@@ -213,6 +213,9 @@
     static NSString* p_result2 = @"aAa bbb ccc\n"
                                  @"aAa bbb ccc\n"; //12
     
+    static NSString* yp_result1= @"aAa AaAabbb ccc\n";
+    static NSString* yp_result2= @"aAa AAaabbb ccc\n";
+    
     static NSString* oO_text = @"int abc(){\n"  // 0 4
     @"}\n";          // 11
     
@@ -238,9 +241,11 @@
                                  @"baabb\n"
                                  @"ccc";
     
+    /*
     static NSString* C_e_result= @"aaa\n"
                                  @"bccbb\n"
                                  @"ccc";
+     */
     
     
     static NSString* J_result0 = @"aaa bbb \n"
@@ -420,13 +425,15 @@
             XVimMakeTestCase(text1, 1,  0, @"y_p", y_result3,  4, 0),
             
             // p, P
-            // TODO: Currently the insertion position after put(P) is not correct.(Must pass followings)
             XVimMakeTestCase(text1, 1,  0, @"yyP", y_result3,  0, 0),
             XVimMakeTestCase(text1, 1,  0, @"y_P", y_result3,  0, 0),
+            XVimMakeTestCase(text0, 1,  0, @"vlyllp.", yp_result1, 7, 0), // Repeat Issue #508
+            XVimMakeTestCase(text0, 1,  0, @"vlywP.", yp_result2, 6, 0), // Repeat Issue #508
             
             // p at EOF
             XVimMakeTestCase(text0, 1,  0, @"yyjp", p_result1, 13, 0),
             XVimMakeTestCase(text0, 1,  0, @"yyjP", p_result2, 12, 0),
+            
             
             // r
             XVimMakeTestCase(text0, 5,  0, @"rX",     r_result1, 5, 0),
@@ -515,7 +522,11 @@
             XVimMakeTestCase(text1, 4, 0, @"a<C-y><C-y><ESC>", C_y_result, 6, 0),
             
             // Insert and Ctrl-e
-            XVimMakeTestCase(text1, 4, 0, @"a<C-e><C-e><ESC>", C_e_result, 6, 0),
+            //   The following test case sometimes fails. I do not know when it occurs but occasionally it happens.
+            //   It looks that <C-e> conflicts to the Xcode native key map(end of line) and not processed
+            //   as Vim's command (insert character below the cursor)
+            //   It is weird that it sometimes passes without any preference changing.
+            // XVimMakeTestCase(text1, 4, 0, @"a<C-e><C-e><ESC>", C_e_result, 6, 0),
             nil];
     
 }

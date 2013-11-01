@@ -161,8 +161,13 @@
 }
 
 - (XVimEvaluator*)onComplete_g:(XVimGActionEvaluator*)childEvaluator{
-    if( childEvaluator.motion != nil ){
-        return [self _motionFixed:childEvaluator.motion];
+    if( [childEvaluator.key.toSelectorString isEqualToString:@"SEMICOLON"] ){
+        XVimMark* mark = [[XVim instance].marks markForName:@"." forDocument:[self.sourceView documentURL].path];
+        return [self jumpToMark:mark firstOfLine:NO];
+    }else{
+        if( childEvaluator.motion != nil ){
+            return [self _motionFixed:childEvaluator.motion];
+        }
     }
     return nil;
 }
@@ -192,13 +197,13 @@
 
 - (XVimEvaluator*)o{
     NSTextView* view = [self sourceView];
-    [view xvim_insertNewlineBelowAndInsert];
+    [view xvim_insertNewlineBelowAndInsertWithIndent];
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)O{
     NSTextView* view = [self sourceView];
-    [view xvim_insertNewlineAboveAndInsert];
+    [view xvim_insertNewlineAboveAndInsertWithIndent];
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
@@ -216,6 +221,7 @@
     NSTextView* view = [self sourceView];
     XVimRegister* reg = [[[XVim instance] registerManager] registerByName:self.yankRegister];
     [view xvim_put:reg.string withType:reg.type afterCursor:YES count:[self numericArg]];
+    [[XVim instance] fixOperationCommands];
     return nil;
 }
 
@@ -223,6 +229,7 @@
     NSTextView* view = [self sourceView];
     XVimRegister* reg = [[[XVim instance] registerManager] registerByName:self.yankRegister];
     [view xvim_put:reg.string withType:reg.type afterCursor:NO count:[self numericArg]];
+    [[XVim instance] fixOperationCommands];
     return nil;
 }
 
