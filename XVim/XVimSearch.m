@@ -544,6 +544,9 @@
     NSUInteger lastIdx = 0;
 
     NSUInteger count = 0;
+    
+    // Save current line to keep the insertion point after the substitute
+    NSUInteger insertionLineAfterSubstitute = [text lineNumber:[window.sourceView insertionPoint]];
 
     [text beginEditing];
 
@@ -609,6 +612,7 @@
              *    We call [NSTextStorage replaceCharactersInRange:withString:]
              *    instead of [NSTextView insertText:replacementRange:] to avoid
              *    position errors with undo/redo.
+             *    The code below changes insertion point internally. We have to save the original position to keep its position. (Already saved above)
              */
 
             if ([window.sourceView shouldChangeTextInRange:match.range replacementString:replacementString]) {
@@ -639,13 +643,18 @@
         }
        
         if (line + 1 != [text lineNumber:idx]) {
-            // TODO: this gets stuck
-            DEBUG_LOG(@"line count adjustment: before <nextLine = %d, toLine = %d>, adjusted <nextLine = %d, toLine = %d>, <diff = %+d>", line + 1, toLine, [text lineNumber:idx], toLine + ([text lineNumber:idx] - line), ([text lineNumber:idx] - line));
-            toLine += [text lineNumber:idx] - line;
+            break;
         }
     }
 
     [text endEditing];
+    
+    // Move the insertion point to head of original line where the insertion point was.
+    XVimMotion* m1 = XVIM_MAKE_MOTION(MOTION_LINENUMBER, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+    m1.line = insertionLineAfterSubstitute;
+    [window.sourceView xvim_move:m1];
+    XVimMotion* m2 = XVIM_MAKE_MOTION(MOTION_BEGINNING_OF_LINE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+    [window.sourceView xvim_move:m2];
 
     DEBUG_LOG(@"%lu substitutions", count);
     [window statusMessage:[NSString stringWithFormat:NSLocalizedString(@"%lu substitutions", @"{replacement count} substitutions"), count]];
