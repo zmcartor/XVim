@@ -9,10 +9,11 @@
 #import "XVimOptions.h"
 #import "DVTFoundation.h"
 
-@interface XVimOptions() {
+@interface XVimOptions(){
 @private
     NSDictionary* _option_maps;
 }
+
 @end
 
 @implementation XVimOptions

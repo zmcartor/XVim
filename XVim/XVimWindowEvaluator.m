@@ -278,7 +278,7 @@
     IDEWorkspaceTabController* tabCtrl = [self tabController:self.window];
     IDEViewController* current = [tabCtrl _currentFirstResponderArea];
     NSArray* allEditors = [self allEditorArea:self.window];
-    NSInteger numEditors= (NSInteger)[allEditors count]; // Should be no problem to cast it to NSInteger
+    NSUInteger numEditors= (NSUInteger)[allEditors count]; // Should be no problem to cast it to NSInteger
     if( 0 == numEditors ){
         // Just in case
         return;
@@ -286,11 +286,11 @@
     
     if( relative ){
         // Relative index (rotation)
-        NSInteger idx = (NSInteger)[allEditors indexOfObject:current] + (count%numEditors) + numEditors; // add numEditors to make it always positive
+        NSUInteger idx = [allEditors indexOfObject:current] + ((NSUInteger)count%numEditors) + numEditors; // add numEditors to make it always positive
         [allEditors[(NSUInteger)idx%numEditors] takeFocus];
     }else{
         // Absolute index (Note: both count and numEditors are not 0 here)
-        count = MIN(ABS(count), numEditors) - 1; // -1 to convert it to array index
+        count = MIN(ABS(count), (NSInteger)numEditors) - 1; // -1 to convert it to array index
         [allEditors[(NSUInteger)count%numEditors] takeFocus];
     }
 }
